@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Form";
+}
+
+<div class="">
+
+
+    <form action="form1" method="post">
+
+        <div>
+            <div>Coins Information</div>
+            <div>
+                <div>
+                    <label>Cents</label>
+                    <input type="text" name="centsInput" />
+                </div>
+
+                <div>
+                    <label>Pennies</label>
+                    <input type="text" name="penniesInput" />
+                </div>
+
+                <div>
+                    <label>Nickels</label>
+                    <input type="text" name="nickelsInput" />
+                </div>
+
+                <div>
+                    <label>Quarters</label>
+                    <input type="text" name="quartersInput" />
+                </div>
+
+            </div>
+        </div>
+
+        <div>
+            <div>Products Information</div>
+            <div>
+                <div>
+                    <label>Coke</label>
+                    <h6>5 drinks available; Cost = 25</h6>
+                    <input type="text" />
+                </div>
+
+                <div>
+                    <label>Pepsi</label>
+                    <h6>15 drinks available; Cost = 36</h6>
+                    <input type="text" />
+                </div>
+
+                <div>
+                    <label>Order Total:</label>
+                    <div># cents/ dollars</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <input type="submit" value="Get Drinks" />
+        </div>
+
+    </form>
+</div>
