@@ -1,11 +1,10 @@
-﻿using DrinksMachine.Models;
+﻿using DrinksMachine.Extensions;
+using DrinksMachine.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DrinksMachine.Controllers
 {
@@ -29,14 +28,15 @@ namespace DrinksMachine.Controllers
         }
 
 
-        [HttpPost("form1")]
-        public ActionResult form1()
+        [HttpPost("process")]
+        public ActionResult Process(DrinksMachineModel drinksMachineModel)
         {
+
+
+            ViewData.Model = drinksMachineModel;
+
             return View("Index");
         }
-
-
-
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

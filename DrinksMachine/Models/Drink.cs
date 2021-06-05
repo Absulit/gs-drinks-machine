@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DrinksMachine.Models
+﻿namespace DrinksMachine.Models
 {
-    public abstract class Drink
+    public class Drink
     {
         public string Name;
-        public int QuantityAvailable;
+        public int QuantityAvailable = 0; // by default there's none
+        public int Cost = 25; // just a minimum value by default
     }
 }

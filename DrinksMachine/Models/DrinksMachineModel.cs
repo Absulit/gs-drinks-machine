@@ -11,5 +11,9 @@ namespace DrinksMachine.Models
         public int Pennies { get; set; } = 0;
         public int Nickels { get; set; } = 0;
         public int Quarters { get; set; } = 0;
+
+        public int CokeAmount { get; set; } = 0;
+        public int PepsiAmount { get; set; } = 0;
+        public int OrdelTotal { get; set; } = 0;
     }
 }
