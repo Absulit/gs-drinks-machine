@@ -60,11 +60,15 @@ export default class DrinkMachineForm extends Identifier {
 
     onOKSubmit = e => {
         console.log('---- onOKSubmit');
+        this.dialog.removeEventListener(Events.OK, this.onOKSubmit);
+        this.dialog.removeEventListener(Events.CANCEL, this.onCancelSubmit);
         return false;
     }
 
     onCancelSubmit = e => {
         console.log('---- onCancelSubmit');
+        this.dialog.removeEventListener(Events.OK, this.onOKSubmit);
+        this.dialog.removeEventListener(Events.CANCEL, this.onCancelSubmit);
         return false;
     }
 
