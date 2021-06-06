@@ -36,11 +36,12 @@ export default class DrinkMachineForm extends Identifier {
         if (isValid) {
             //this.dispatchEvent(new Event(Events.SAVE));
 
+            const orderDetailDialog = this.getOrderDetaillMessage();
             const orderTotalDialog = this.getOrderTotalMessage();
 
             this.dialog.addEventListener(Events.OK, this.onOKSubmit);
             this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
-            this.dialog.show('Drink Machine - Payment', `<p> Info Line 1 </p> <p>Your order total is ${orderTotalDialog} </p>`, 'OK', 'Cancel');
+            this.dialog.show('Drink Machine - Payment', `<p> Order detail: ${orderDetailDialog}</p> <p>Your order total is ${orderTotalDialog} </p>`, 'OK', 'Cancel');
 
             /*const data = {
                 'cents': Number(this.centsInput.value),
@@ -58,6 +59,18 @@ export default class DrinkMachineForm extends Identifier {
         }
 
         return false;
+    }
+
+    getOrderDetaillMessage = () => {
+        let message = '';
+        let cost = 0;
+        this._drinkInputs.forEach(drinkInput => {
+            if (drinkInput.drinkAmount.value > 0) {
+                cost = drinkInput.cost * drinkInput.drinkAmount.value;
+                message += `<p>${drinkInput.drinkAmount.value} ${drinkInput.name} with a value of ${cost} </p>`;
+            }
+        });
+        return message;
     }
 
     onOKSubmit = e => {
@@ -120,15 +133,16 @@ export default class DrinkMachineForm extends Identifier {
             div = document.createElement('div');
             this.drinkInputs.appendChild(div);
             drinkInput = new DrinkInput(div, drinkData.name, drinkData.quantityAvailable, drinkData.cost);
+            drinkInput.name = drinkData.name;
             drinkInput.cost = drinkData.cost;
             drinkInput.addEventListener(Events.CHANGED, this.onChangeDrinkAmount);
             totalDrinks += drinkData.quantityAvailable;
             this._drinkInputs.push(drinkInput);
         });
 
-        if(totalDrinks === 0){
+        if (totalDrinks === 0) {
             submitEl.classList.add('disabled');
-        }else{
+        } else {
             this.disableSubmitIfCostIsZero();
         }
     }
@@ -153,18 +167,18 @@ export default class DrinkMachineForm extends Identifier {
 
     getOrderTotalMessage = () => {
         let orderTotal;
-        if(this._totalCostDrinks >= 100){
-            orderTotal = `${this._totalCostDrinks/100} dollars`;
-        }else{
+        if (this._totalCostDrinks >= 100) {
+            orderTotal = `${this._totalCostDrinks / 100} dollars`;
+        } else {
             orderTotal = `${this._totalCostDrinks} cents`;
         }
         return orderTotal;
     }
 
     disableSubmitIfCostIsZero = () => {
-        if((this._totalCostDrinks > 0) && (this._totalPayCoins > 0) && (this._totalPayCoins >= this._totalCostDrinks)){
+        if ((this._totalCostDrinks > 0) && (this._totalPayCoins > 0) && (this._totalPayCoins >= this._totalCostDrinks)) {
             submitEl.classList.remove('disabled');
-        }else{
+        } else {
             submitEl.classList.add('disabled');
         }
     }
