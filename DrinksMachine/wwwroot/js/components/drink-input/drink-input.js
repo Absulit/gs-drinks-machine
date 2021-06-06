@@ -16,6 +16,10 @@ export default class DrinkInput extends Identifier {
 
         this.drinkAmount.addEventListener('change', this.onChangeDrinkAmount);
 
+        if(this._quantity == 0){
+            this.drinkAmount.classList.add('disabled');
+        }
+
         this.drinkLabel.innerHTML = this._name;
         this.drinkQuantity.innerHTML = this._quantity;
         this.drinkCost.innerHTML = this._cost;

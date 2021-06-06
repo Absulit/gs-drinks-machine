@@ -9,6 +9,8 @@ import CoinInput from "./coin-input/coin-input.js";
 export default class DrinkMachineForm extends Identifier {
     constructor(el) {
         super(el, import.meta.url + '/../drink-machine-form.html');
+        this._totalCostDrinks = 0;
+        this._drinkInputs = [];
         this.dataHandler = new DataHandler();
     }
 
@@ -76,12 +78,20 @@ export default class DrinkMachineForm extends Identifier {
 
         let drinkInput;
         let div;
+        let totalDrinks = 0;
         data.forEach(drinkData => {
             div = document.createElement('div');
             this.drinkInputs.appendChild(div);
             drinkInput = new DrinkInput(div, drinkData.name, drinkData.quantityAvailable, drinkData.cost);
+            drinkInput.cost = drinkData.cost;
             drinkInput.addEventListener(Events.CHANGED, this.onChangeDrinkAmount);
+            totalDrinks += drinkData.quantityAvailable;
+            this._drinkInputs.push(drinkInput);
         });
+
+        if(totalDrinks === 0){
+            submitEl.classList.add('disabled');
+        }
     }
 
     onProcessComplete = e => {
@@ -90,6 +100,18 @@ export default class DrinkMachineForm extends Identifier {
     }
 
     onChangeDrinkAmount = e => {
-        console.log('---- DrinkMachineForm, onChangeDrinkAmount', e);
+        console.log('---- DrinkMachineForm, onChangeDrinkAmount');
+        this._totalCostDrinks = 0;
+        this._drinkInputs.forEach(drinkInput => {
+            this._totalCostDrinks += (drinkInput.cost * drinkInput.drinkAmount.value);
+        });
+        console.log('---- DrinkMachineForm, onChangeDrinkAmount, totalCostDrinks: ', this._totalCostDrinks);
+
+        if(this._totalCostDrinks >= 100){
+            this.orderTotalEl.innerHTML = `${this._totalCostDrinks/100} dollars`
+        }else{
+            this.orderTotalEl.innerHTML = `${this._totalCostDrinks} cents`
+        }
+
     }
 }
