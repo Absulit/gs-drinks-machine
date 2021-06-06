@@ -36,9 +36,11 @@ export default class DrinkMachineForm extends Identifier {
         if (isValid) {
             //this.dispatchEvent(new Event(Events.SAVE));
 
+            const orderTotalDialog = this.getOrderTotalMessage();
+
             this.dialog.addEventListener(Events.OK, this.onOKSubmit);
             this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
-            this.dialog.show('Drink Machine - Payment', '<p> Info Line 1 </p> <p>Info Line 2</p>', 'OK', 'Cancel');
+            this.dialog.show('Drink Machine - Payment', `<p> Info Line 1 </p> <p>Your order total is ${orderTotalDialog} </p>`, 'OK', 'Cancel');
 
             /*const data = {
                 'cents': Number(this.centsInput.value),
@@ -146,11 +148,17 @@ export default class DrinkMachineForm extends Identifier {
 
         this.disableSubmitIfCostIsZero();
 
+        this.orderTotalEl.innerHTML = this.getOrderTotalMessage();
+    }
+
+    getOrderTotalMessage = () => {
+        let orderTotal;
         if(this._totalCostDrinks >= 100){
-            this.orderTotalEl.innerHTML = `${this._totalCostDrinks/100} dollars`
+            orderTotal = `${this._totalCostDrinks/100} dollars`;
         }else{
-            this.orderTotalEl.innerHTML = `${this._totalCostDrinks} cents`
+            orderTotal = `${this._totalCostDrinks} cents`;
         }
+        return orderTotal;
     }
 
     disableSubmitIfCostIsZero = () => {
