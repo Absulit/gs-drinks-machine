@@ -5,22 +5,22 @@
         <div>
             <div>
                 <label class="form-label">Cents</label>
-                <input class="form-input" type="text" id="centsInput" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" type="number" min="0" id="centsInput" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
             <div>
                 <label class="form-label">Pennies</label>
-                <input class="form-input" type="text" id="penniesInput" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" type="number" min="0" id="penniesInput" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
             <div>
                 <label class="form-label">Nickels</label>
-                <input class="form-input" type="text" id="nickelsInput" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" type="number" min="0" id="nickelsInput" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
             <div>
                 <label class="form-label">Quarters</label>
-                <input class="form-input" type="text" id="quartersInput" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" type="number" min="0" id="quartersInput" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
         </div>
@@ -32,13 +32,13 @@
             <div>
                 <label class="form-label" id="cokeLabel"></label>
                 <h6> <span id="cokeQuantity"></span> drinks available; Cost = <span id="cokeCost"></span> </h6>
-                <input class="form-input" id="cokeAmount" type="text" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" id="cokeAmount" type="number" min="0" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
             <div>
                 <label class="form-label" id="pepsiLabel"></label>
                 <h6> <span id="pepsiQuantity"></span> drinks available; Cost = <span id="pepsiCost"></span> </h6>
-                <input class="form-input" id="pepsiAmount" type="text" pattern="^[+-]?(\d*\.)?\d+$" />
+                <input class="form-input" id="pepsiAmount" type="number" min="0" pattern="^[+-]?(\d*\.)?\d+$" />
             </div>
 
             <div>
