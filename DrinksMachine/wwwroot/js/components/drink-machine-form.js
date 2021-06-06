@@ -4,6 +4,7 @@ import DataHandler from "../DataHandler.js";
 import Identifier from "../Identifier.js";
 import Events from "../Events.js"
 import DrinkInput from "./drink-input/drink-input.js";
+import CoinInput from "./coin-input/coin-input.js";
 
 export default class DrinkMachineForm extends Identifier {
     constructor(el) {
@@ -15,8 +16,10 @@ export default class DrinkMachineForm extends Identifier {
         this.submitEl.onclick = this.onClickSubmit;
         console.log('---- INIT', this.formEl);
 
-        this.dataHandler.addEventListener(Events.COMPLETE, this.onDrinksGetComplete);
-        this.dataHandler.get('/Drinks/GetAll');
+        this.dataHandler.addEventListener(Events.COMPLETE, this.onCoinsGetComplete);
+        this.dataHandler.get('/Coins/GetAll');
+
+
     }
 
     onClickSubmit = (e) => {
@@ -40,6 +43,29 @@ export default class DrinkMachineForm extends Identifier {
         }
 
         return false;
+    }
+
+    onCoinsGetComplete = e => {
+        this.dataHandler.removeEventListener(Events.COMPLETE, this.onCoinsGetComplete);
+        const data = this.dataHandler.data;
+        console.log('---- onCoinsGetComplete, data', data);
+
+        let coinInput;
+        let div;
+        data.forEach(coindata => {
+            div = document.createElement('div');
+            this.coinInputs.appendChild(div);
+            coinInput = new CoinInput(div, coindata.name);
+            coinInput.addEventListener(Events.CHANGED, this.onChangeCoinInput);
+        });
+
+
+        this.dataHandler.addEventListener(Events.COMPLETE, this.onDrinksGetComplete);
+        this.dataHandler.get('/Drinks/GetAll');
+    }
+
+    onChangeCoinInput = e => {
+        console.log('---- DrinkMachineForm, onChangeCoinInput', e);
     }
 
     onDrinksGetComplete = e => {
