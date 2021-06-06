@@ -19,6 +19,8 @@ export default class DrinkInput extends Identifier {
         this.drinkLabel.innerHTML = this._name;
         this.drinkQuantity.innerHTML = this._quantity;
         this.drinkCost.innerHTML = this._cost;
+
+        this.drinkAmount.max = this._quantity;
     }
 
     onChangeDrinkAmount = e => {
