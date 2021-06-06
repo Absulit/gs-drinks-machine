@@ -19,6 +19,7 @@ namespace DrinksMachine.Controllers
 
         public IActionResult Index()
         {
+            ViewData.Model = new DrinksMachineModel();
             return View();
         }
 
@@ -29,13 +30,13 @@ namespace DrinksMachine.Controllers
 
 
         [HttpPost("process")]
-        public ActionResult Process(DrinksMachineModel drinksMachineModel)
+        public ActionResult Process([FromBody]DrinksMachineModel drinksMachineModel)
         {
-
+            Debugger.Log(0, "category", $"---- CENTS { drinksMachineModel.Cents } \n\n");
 
             ViewData.Model = drinksMachineModel;
 
-            return View("Index");
+            return Ok(drinksMachineModel);
         }
 
 

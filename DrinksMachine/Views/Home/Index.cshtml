@@ -9,64 +9,10 @@
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor;
 @using DrinksMachine.Extensions;
 
-<div  class="form-group">
+<div  class="form-group column col-6 ">
 
+    <div id="form-container"></div>
 
-    <form>
-
-        <div>
-            <div>Coins Information</div>
-            <div>
-                <div>
-                    <label class="form-label" >Cents</label>
-                    <input class="form-input"  type="text" name="centsInput" />
-                </div>
-
-                <div>
-                    <label class="form-label" >Pennies</label>
-                    <input class="form-input"  type="text" name="penniesInput" />
-                </div>
-
-                <div>
-                    <label class="form-label" >Nickels</label>
-                    <input class="form-input"  type="text" name="nickelsInput" />
-                </div>
-
-                <div>
-                    <label class="form-label" >Quarters</label>
-                    <input class="form-input"  type="text" name="quartersInput" />
-                </div>
-
-            </div>
-        </div>
-
-        <div>
-            <div>Products Information</div>
-            <div>
-                <div>
-                    <label class="form-label"  id="cokeLabel"></label>
-                    <h6> <span id="cokeQuantity"></span> drinks available; Cost = <span id="cokeCost"></span> </h6>
-                    <input class="form-input"  type="text" />
-                </div>
-
-                <div>
-                    <label class="form-label"  id="pepsiLabel"></label>
-                    <h6> <span id="pepsiQuantity"></span> drinks available; Cost = <span id="pepsiCost"></span> </h6>
-                    <input class="form-input"  type="text" />
-                </div>
-
-                <div>
-                    <label class="form-label" >Order Total:</label>
-                    <div># cents/ dollars</div>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <button class="btn btn-primary" id="submitEl">Get Drinks</button>
-        </div>
-
-    </form>
 </div>
 
 
