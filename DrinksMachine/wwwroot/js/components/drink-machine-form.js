@@ -10,6 +10,10 @@ import Dialog from './dialog/dialog.js';
 export default class DrinkMachineForm extends Identifier {
     constructor(el) {
         super(el, import.meta.url + '/../drink-machine-form.html');
+
+        // this one stores the coins comming from the BE
+        this._coins = null;
+
         this._totalCostDrinks = 0;
         this._totalPayCoins = 0;
 
@@ -33,30 +37,50 @@ export default class DrinkMachineForm extends Identifier {
     onClickSubmit = e => {
         const isValid = this.formEl.reportValidity();
 
-        if (isValid) {
-            //this.dispatchEvent(new Event(Events.SAVE));
-
-            const orderDetailDialog = this.getOrderDetaillMessage();
-            const orderTotalDialog = this.getOrderTotalMessage();
+        const change = this.getChangeCoins();
+        console.log('---- change: ', change);
+        const notEnoughChange = change.shouldReturnChange && change.difference > 0
+        if (notEnoughChange) {
+            console.log('---- NOT ENOUGH CHANGE ');
 
             this.dialog.addEventListener(Events.OK, this.onOKSubmit);
             this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
-            this.dialog.show('Drink Machine - Payment', `<p> Order detail: ${orderDetailDialog}</p> <p>Your order total is ${orderTotalDialog} </p>`, 'OK', 'Cancel');
+            this.dialog.show('Drink Machine - Payment', `<p>Not sufficient change in the inventory</p>`, 'OK', 'Cancel');
 
-            /*const data = {
-                'cents': Number(this.centsInput.value),
-                'pennies': Number(this.penniesInput.value),
-                'nickels': Number(this.nickelsInput.value),
-                'quarters': Number(this.quartersInput.value),
-                'cokeAmount': Number(this.cokeAmount.value),
-                'pepsiAmount': Number(this.pepsiAmount.value),
-                'orderTotal': 0
+
+        } else {
+            if (isValid) {
+                //this.dispatchEvent(new Event(Events.SAVE));
+
+                const orderDetailDialog = this.getOrderDetaillMessage();
+                const orderTotalDialog = this.getOrderTotalMessage();
+
+                let changeDialog = '';
+                if (change.shouldReturnChange) {
+                    changeDialog = this.getChangeMessage(change);
+                    changeDialog = `<p><strong>Your change is:</strong> ${changeDialog}</p>`
+                }
+
+                this.dialog.addEventListener(Events.OK, this.onOKSubmit);
+                this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
+                this.dialog.show('Drink Machine - Payment', `<p> <strong>Order detail:</strong> ${orderDetailDialog}</p> <p><strong>Your order total is:</strong> ${orderTotalDialog} </p> <p>${changeDialog}</p>`, 'OK', 'Cancel');
+
+                /*const data = {
+                    'cents': Number(this.centsInput.value),
+                    'pennies': Number(this.penniesInput.value),
+                    'nickels': Number(this.nickelsInput.value),
+                    'quarters': Number(this.quartersInput.value),
+                    'cokeAmount': Number(this.cokeAmount.value),
+                    'pepsiAmount': Number(this.pepsiAmount.value),
+                    'orderTotal': 0
+                }
+                console.log('----data', data)
+    
+                this.dataHandler.addEventListener(Events.COMPLETE, this.onProcessComplete);
+                this.dataHandler.post('/process', data);*/
             }
-            console.log('----data', data)
-
-            this.dataHandler.addEventListener(Events.COMPLETE, this.onProcessComplete);
-            this.dataHandler.post('/process', data);*/
         }
+
 
         return false;
     }
@@ -89,8 +113,9 @@ export default class DrinkMachineForm extends Identifier {
 
     onCoinsGetComplete = e => {
         this.dataHandler.removeEventListener(Events.COMPLETE, this.onCoinsGetComplete);
-        const data = this.dataHandler.data;
+        const data = this._coins = this.dataHandler.data;
         console.log('---- onCoinsGetComplete, data', data);
+
 
         let coinInput;
         let div;
@@ -103,8 +128,12 @@ export default class DrinkMachineForm extends Identifier {
             this._coinInputs.push(coinInput);
         });
 
+        // sort DESC coins by centsEquivalent
+        this._coins.sort((a, b) => b.centsEquivalent - a.centsEquivalent);
+
         this.dataHandler.addEventListener(Events.COMPLETE, this.onDrinksGetComplete);
         this.dataHandler.get('/Drinks/GetAll');
+
     }
 
     onChangeCoinInput = e => {
@@ -158,7 +187,7 @@ export default class DrinkMachineForm extends Identifier {
         this._drinkInputs.forEach(drinkInput => {
             this._totalCostDrinks += (drinkInput.cost * drinkInput.drinkAmount.value);
         });
-        console.log('---- DrinkMachineForm, onChangeDrinkAmount, totalCostDrinks: ', this._totalCostDrinks);
+        console.log('---- DrinkMachineForm, onChangeDrinkAmount, _totalCostDrinks: ', this._totalCostDrinks);
 
         this.disableSubmitIfCostIsZero();
 
@@ -175,11 +204,64 @@ export default class DrinkMachineForm extends Identifier {
         return orderTotal;
     }
 
+    getChangeMessage = changeData => {
+        const change = changeData.change;
+        let message = '';
+        change.forEach(changeItem => {
+            message += `<p>${changeItem.amount} ${changeItem.name} </p>`
+        });
+        return message;
+    }
+
     disableSubmitIfCostIsZero = () => {
         if ((this._totalCostDrinks > 0) && (this._totalPayCoins > 0) && (this._totalPayCoins >= this._totalCostDrinks)) {
             submitEl.classList.remove('disabled');
         } else {
             submitEl.classList.add('disabled');
         }
+    }
+
+    getChangeCoins = () => {
+        let changeResult = { shouldReturnChange: false, change: null, difference: 0 };
+        let change = [];
+        let difference = 0;
+        if ((this._totalCostDrinks > 0) && (this._totalPayCoins > 0) && (this._totalPayCoins >= this._totalCostDrinks)) {
+
+            changeResult.shouldReturnChange = this._totalPayCoins > this._totalCostDrinks;
+            // calculate change
+            if (changeResult.shouldReturnChange) {
+                // no change
+                difference = this._totalPayCoins - this._totalCostDrinks;
+
+                console.log('---- this._totalPayCoins', this._totalPayCoins);
+                console.log('---- this._totalCostDrinks', this._totalCostDrinks);
+                console.log('---- difference', difference);
+                console.log('---- coins sorted', this._coins);
+                this._coins.forEach(coin => {
+                    if (coin.amount > 0) { // if no coins we can no provide change of this type
+                        const timesToSubstract = Math.floor(difference / coin.centsEquivalent); // ignore remainder
+                        // check if difference is big enough to pay in this coin
+                        if (timesToSubstract > 0) {
+                            console.log('---- timesToSubstract', timesToSubstract);
+                            const coinAmountToSubstract = timesToSubstract * coin.centsEquivalent;
+                            difference -= coinAmountToSubstract;
+
+                            // remove the coins we provide as change
+                            coin.amount -= timesToSubstract;
+
+                            let changeCoin = {
+                                name: coin.name,
+                                amount: timesToSubstract
+                            }
+                            change.push(changeCoin);
+                        }
+                    }
+                });
+
+            }
+        }
+        changeResult.change = change;
+        changeResult.difference = difference;
+        return changeResult;
     }
 }
