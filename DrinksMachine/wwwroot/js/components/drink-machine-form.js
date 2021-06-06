@@ -10,7 +10,10 @@ export default class DrinkMachineForm extends Identifier {
     constructor(el) {
         super(el, import.meta.url + '/../drink-machine-form.html');
         this._totalCostDrinks = 0;
+        this._totalPayCoins = 0;
+
         this._drinkInputs = [];
+        this._coinInputs = [];
         this.dataHandler = new DataHandler();
     }
 
@@ -20,8 +23,6 @@ export default class DrinkMachineForm extends Identifier {
 
         this.dataHandler.addEventListener(Events.COMPLETE, this.onCoinsGetComplete);
         this.dataHandler.get('/Coins/GetAll');
-
-
     }
 
     onClickSubmit = (e) => {
@@ -58,16 +59,26 @@ export default class DrinkMachineForm extends Identifier {
             div = document.createElement('div');
             this.coinInputs.appendChild(div);
             coinInput = new CoinInput(div, coindata.name);
+            coinInput.centsEquivalent = coindata.centsEquivalent;
             coinInput.addEventListener(Events.CHANGED, this.onChangeCoinInput);
+            this._coinInputs.push(coinInput);
         });
-
 
         this.dataHandler.addEventListener(Events.COMPLETE, this.onDrinksGetComplete);
         this.dataHandler.get('/Drinks/GetAll');
     }
 
     onChangeCoinInput = e => {
-        console.log('---- DrinkMachineForm, onChangeCoinInput', e);
+        console.log('---- DrinkMachineForm, onChangeCoinInput');
+        this._totalPayCoins = 0;
+        this._coinInputs.forEach(coinInput => {
+            this._totalPayCoins += (coinInput.centsEquivalent * coinInput.coinInput.value);
+        });
+        console.log('---- DrinkMachineForm, onChangeCoinInput, _totalPayCoins: ', this._totalPayCoins);
+
+        this.disableSubmitIfCostIsZero();
+
+        this.paymentTotalEl.innerHTML = `${this._totalPayCoins} cents`
     }
 
     onDrinksGetComplete = e => {
@@ -91,6 +102,8 @@ export default class DrinkMachineForm extends Identifier {
 
         if(totalDrinks === 0){
             submitEl.classList.add('disabled');
+        }else{
+            this.disableSubmitIfCostIsZero();
         }
     }
 
@@ -107,11 +120,20 @@ export default class DrinkMachineForm extends Identifier {
         });
         console.log('---- DrinkMachineForm, onChangeDrinkAmount, totalCostDrinks: ', this._totalCostDrinks);
 
+        this.disableSubmitIfCostIsZero();
+
         if(this._totalCostDrinks >= 100){
             this.orderTotalEl.innerHTML = `${this._totalCostDrinks/100} dollars`
         }else{
             this.orderTotalEl.innerHTML = `${this._totalCostDrinks} cents`
         }
+    }
 
+    disableSubmitIfCostIsZero = () => {
+        if((this._totalCostDrinks > 0) && (this._totalPayCoins > 0) && (this._totalPayCoins >= this._totalCostDrinks)){
+            submitEl.classList.remove('disabled');
+        }else{
+            submitEl.classList.add('disabled');
+        }
     }
 }
