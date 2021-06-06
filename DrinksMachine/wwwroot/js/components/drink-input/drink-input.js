@@ -1,0 +1,28 @@
+'use strict'
+
+import Events from "../../Events.js";
+import Identifier from "../../Identifier.js";
+
+export default class DrinkInput extends Identifier {
+    constructor(el, name, quantity, cost) {
+        super(el, import.meta.url + '/../drink-input.html');
+        this._name = name;
+        this._quantity = quantity;
+        this._cost = cost;
+    }
+
+    init = () => {
+        console.log('---- DrinkInput INIT');
+
+        this.drinkAmount.addEventListener('change', this.onChangeDrinkAmount);
+
+        this.drinkLabel.innerHTML = this._name;
+        this.drinkQuantity.innerHTML = this._quantity;
+        this.drinkCost.innerHTML = this._cost;
+    }
+
+    onChangeDrinkAmount = e => {
+        console.log('---- DrinkInput, onChangeDrinkAmount');
+        this.dispatch(Events.CHANGED);
+    }
+}
