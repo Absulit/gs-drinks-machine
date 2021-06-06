@@ -1,10 +1,11 @@
 ﻿'use strict';
 
-import DataHandler from "../DataHandler.js";
-import Identifier from "../Identifier.js";
-import Events from "../Events.js"
-import DrinkInput from "./drink-input/drink-input.js";
-import CoinInput from "./coin-input/coin-input.js";
+import DataHandler from '../DataHandler.js';
+import Identifier from '../Identifier.js';
+import Events from '../Events.js'
+import DrinkInput from './drink-input/drink-input.js';
+import CoinInput from './coin-input/coin-input.js';
+import Dialog from './dialog/dialog.js';
 
 export default class DrinkMachineForm extends Identifier {
     constructor(el) {
@@ -15,6 +16,8 @@ export default class DrinkMachineForm extends Identifier {
         this._drinkInputs = [];
         this._coinInputs = [];
         this.dataHandler = new DataHandler();
+
+        this.dialog = null;
     }
 
     init = () => {
@@ -23,14 +26,21 @@ export default class DrinkMachineForm extends Identifier {
 
         this.dataHandler.addEventListener(Events.COMPLETE, this.onCoinsGetComplete);
         this.dataHandler.get('/Coins/GetAll');
+
+        this.dialog = new Dialog(this.dialogEl);
     }
 
-    onClickSubmit = (e) => {
+    onClickSubmit = e => {
         const isValid = this.formEl.reportValidity();
 
         if (isValid) {
             //this.dispatchEvent(new Event(Events.SAVE));
-            const data = {
+
+            this.dialog.addEventListener(Events.OK, this.onOKSubmit);
+            this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
+            this.dialog.show('Drink Machine - Payment', '<p> Info Line 1 </p> <p>Info Line 2</p>', 'OK', 'Cancel');
+
+            /*const data = {
                 'cents': Number(this.centsInput.value),
                 'pennies': Number(this.penniesInput.value),
                 'nickels': Number(this.nickelsInput.value),
@@ -42,9 +52,19 @@ export default class DrinkMachineForm extends Identifier {
             console.log('----data', data)
 
             this.dataHandler.addEventListener(Events.COMPLETE, this.onProcessComplete);
-            this.dataHandler.post('/process', data);
+            this.dataHandler.post('/process', data);*/
         }
 
+        return false;
+    }
+
+    onOKSubmit = e => {
+        console.log('---- onOKSubmit');
+        return false;
+    }
+
+    onCancelSubmit = e => {
+        console.log('---- onCancelSubmit');
         return false;
     }
 
