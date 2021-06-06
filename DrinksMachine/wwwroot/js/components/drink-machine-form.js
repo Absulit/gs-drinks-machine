@@ -15,6 +15,9 @@ export default class DrinkMachineForm extends Identifier {
         this.submitEl.onclick = this.onClickSubmit;
         console.log('---- INIT', this.formEl);
         this.dataHandler.addEventListener(Events.COMPLETE, this.onProcessComplete);
+
+        this.cokeAmount.addEventListener('change', this.onChangeDrinkAmount);
+        this.pepsiAmount.addEventListener('change', this.onChangeDrinkAmount);
     }
 
     onClickSubmit = (e) => {
@@ -47,5 +50,9 @@ export default class DrinkMachineForm extends Identifier {
     onProcessComplete = e => {
         this.dataHandler.removeEventListener(Events.COMPLETE, this.onProcessComplete);
         console.log('---- onProcessComplete');
+    }
+
+    onChangeDrinkAmount = e => {
+        console.log('---- onChangeDrinkAmount');
     }
 }
