@@ -20,14 +20,14 @@ namespace DrinksMachine.Controllers
             // coke
             Drink coke = new Drink()
             {
-                Name = "coke",
+                Name = "Coke",
                 QuantityAvailable = 5,
                 Cost = 5
             };
             // pepsi
             Drink pepsi = new Drink()
             {
-                Name = "pepsi",
+                Name = "Pepsi",
                 QuantityAvailable = 15,
                 Cost = 36
             };
@@ -35,7 +35,7 @@ namespace DrinksMachine.Controllers
             // soda?
             Drink soda = new Drink()
             {
-                Name = "soda?",
+                Name = "Generic Soda",
                 QuantityAvailable = 3,
                 Cost = 45
             };
