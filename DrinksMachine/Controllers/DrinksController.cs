@@ -59,5 +59,13 @@ namespace DrinksMachine.Controllers
             }
             return Ok(drinks);
         }
+
+        [HttpPut]
+        public IActionResult Update([FromBody] List<Drink> drinksToUpdate)
+        {
+            drinks = drinksToUpdate;
+            _logger.LogDebug("---- drinks", drinks);
+            return Ok(drinks);
+        }
     }
 }

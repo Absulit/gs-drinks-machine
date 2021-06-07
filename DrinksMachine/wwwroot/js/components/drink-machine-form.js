@@ -13,6 +13,10 @@ export default class DrinkMachineForm extends Identifier {
 
         // this one stores the coins comming from the BE
         this._coins = null;
+        this._coinsUpdated = null; // used for a copy to update the BE if we accept the transaction
+
+        this._drinks = null
+        this._drinksUpdated = null; // used for a copy to update the BE if we accept the transaction
 
         this._totalCostDrinks = 0;
         this._totalPayCoins = 0;
@@ -32,6 +36,19 @@ export default class DrinkMachineForm extends Identifier {
         this.dataHandler.get('/Coins/GetAll');
 
         this.dialog = new Dialog(this.dialogEl);
+    }
+
+    clear = () => {
+        this._drinkInputs = [];
+        this._coinInputs = [];
+
+        this.coinInputs.innerHTML = '';
+        this.drinkInputs.innerHTML = '';
+        this.orderTotalEl.innerHTML = '# cents/ dollars';
+        this.paymentTotalEl.innerHTML = '# cents/ dollars';
+
+        this._totalCostDrinks = 0;
+        this._totalPayCoins = 0;
     }
 
     onClickSubmit = e => {
@@ -64,23 +81,8 @@ export default class DrinkMachineForm extends Identifier {
                 this.dialog.addEventListener(Events.OK, this.onOKSubmit);
                 this.dialog.addEventListener(Events.CANCEL, this.onCancelSubmit);
                 this.dialog.show('Drink Machine - Payment', `<p> <strong>Order detail:</strong> ${orderDetailDialog}</p> <p><strong>Your order total is:</strong> ${orderTotalDialog} </p> <p>${changeDialog}</p>`, 'OK', 'Cancel');
-
-                /*const data = {
-                    'cents': Number(this.centsInput.value),
-                    'pennies': Number(this.penniesInput.value),
-                    'nickels': Number(this.nickelsInput.value),
-                    'quarters': Number(this.quartersInput.value),
-                    'cokeAmount': Number(this.cokeAmount.value),
-                    'pepsiAmount': Number(this.pepsiAmount.value),
-                    'orderTotal': 0
-                }
-                console.log('----data', data)
-    
-                this.dataHandler.addEventListener(Events.COMPLETE, this.onProcessComplete);
-                this.dataHandler.post('/process', data);*/
             }
         }
-
 
         return false;
     }
@@ -91,7 +93,7 @@ export default class DrinkMachineForm extends Identifier {
         this._drinkInputs.forEach(drinkInput => {
             if (drinkInput.drinkAmount.value > 0) {
                 cost = drinkInput.cost * drinkInput.drinkAmount.value;
-                message += `<p>${drinkInput.drinkAmount.value} ${drinkInput.name} with a value of ${cost} </p>`;
+                message += `<p>${drinkInput.drinkAmount.value} ${drinkInput.name} with a value of ${cost} cents.</p>`;
             }
         });
         return message;
@@ -101,7 +103,33 @@ export default class DrinkMachineForm extends Identifier {
         console.log('---- onOKSubmit');
         this.dialog.removeEventListener(Events.OK, this.onOKSubmit);
         this.dialog.removeEventListener(Events.CANCEL, this.onCancelSubmit);
+
+
+        this.getUpdatedDrinks();
+        console.log('---- onOKSubmit, this._drinksUpdated', this._drinksUpdated);
+        this.dataHandler.addEventListener(Events.COMPLETE, this.onUpdateDrinksComplete);
+        this.dataHandler.put('/Drinks/Update', this._drinksUpdated);
+
         return false;
+    }
+
+    onUpdateDrinksComplete = e => {
+        this.dataHandler.removeEventListener(Events.COMPLETE, this.onUpdateDrinksComplete);
+
+        // we sort back the coins
+        this._coinsUpdated.sort((a, b) => a.index - b.index);
+        // we update the coins in the BE
+        this.dataHandler.addEventListener(Events.COMPLETE, this.onUpdateCoinsComplete);
+        this.dataHandler.put('/Coins/Update', this._coinsUpdated);
+    }
+
+    onUpdateCoinsComplete = e => {
+        this.dataHandler.removeEventListener(Events.COMPLETE, this.onUpdateCoinsComplete);
+
+        this.clear();
+        // we call the coins again
+        this.dataHandler.addEventListener(Events.COMPLETE, this.onCoinsGetComplete);
+        this.dataHandler.get('/Coins/GetAll');
     }
 
     onCancelSubmit = e => {
@@ -129,6 +157,9 @@ export default class DrinkMachineForm extends Identifier {
         });
 
         // sort DESC coins by centsEquivalent
+        this._coins.forEach((coin, index) => {
+            coin.index = index;
+        })
         this._coins.sort((a, b) => b.centsEquivalent - a.centsEquivalent);
 
         this.dataHandler.addEventListener(Events.COMPLETE, this.onDrinksGetComplete);
@@ -152,22 +183,26 @@ export default class DrinkMachineForm extends Identifier {
     onDrinksGetComplete = e => {
         this.dataHandler.removeEventListener(Events.COMPLETE, this.onDrinksGetComplete);
 
-        const data = this.dataHandler.data;
+        const data = this._drinks = this.dataHandler.data;
         console.log('---- onDrinksGetComplete, data', data);
 
         let drinkInput;
         let div;
         let totalDrinks = 0;
-        data.forEach(drinkData => {
+        data.forEach((drinkData, index) => {
             div = document.createElement('div');
             this.drinkInputs.appendChild(div);
             drinkInput = new DrinkInput(div, drinkData.name, drinkData.quantityAvailable, drinkData.cost);
+            drinkInput.index = index;
             drinkInput.name = drinkData.name;
             drinkInput.cost = drinkData.cost;
             drinkInput.addEventListener(Events.CHANGED, this.onChangeDrinkAmount);
             totalDrinks += drinkData.quantityAvailable;
             this._drinkInputs.push(drinkInput);
         });
+        this._drinks.forEach((drink, index) => {
+            drink.index = index;
+        })
 
         if (totalDrinks === 0) {
             submitEl.classList.add('disabled');
@@ -185,7 +220,10 @@ export default class DrinkMachineForm extends Identifier {
         console.log('---- DrinkMachineForm, onChangeDrinkAmount');
         this._totalCostDrinks = 0;
         this._drinkInputs.forEach(drinkInput => {
-            this._totalCostDrinks += (drinkInput.cost * drinkInput.drinkAmount.value);
+            console.log('---- DrinkMachineForm, onChangeDrinkAmount, drinkInput.drinkAmount.disabled', drinkInput.drinkAmount.classList.contains('disabled'));
+            if(!drinkInput.drinkAmount.classList.contains('disabled')){
+                this._totalCostDrinks += (drinkInput.cost * drinkInput.drinkAmount.value);
+            }
         });
         console.log('---- DrinkMachineForm, onChangeDrinkAmount, _totalCostDrinks: ', this._totalCostDrinks);
 
@@ -237,7 +275,8 @@ export default class DrinkMachineForm extends Identifier {
                 console.log('---- this._totalCostDrinks', this._totalCostDrinks);
                 console.log('---- difference', difference);
                 console.log('---- coins sorted', this._coins);
-                this._coins.forEach(coin => {
+                this._coinsUpdated = this._coins.slice();// copy the coins
+                this._coinsUpdated.forEach(coin => {
                     if (coin.amount > 0) { // if no coins we can no provide change of this type
                         const timesToSubstract = Math.floor(difference / coin.centsEquivalent); // ignore remainder
                         // check if difference is big enough to pay in this coin
@@ -263,5 +302,21 @@ export default class DrinkMachineForm extends Identifier {
         changeResult.change = change;
         changeResult.difference = difference;
         return changeResult;
+    }
+
+    getUpdatedDrinks = () => {
+        this._drinksUpdated = this._drinks.slice();// copy the drinks
+
+        console.log('---- getUpdatedDrinks, this._drinksUpdated: ', this._drinksUpdated);
+        console.log('---- getUpdatedDrinks, this._drinkInputs: ', this._drinkInputs);
+        let drinkInput;
+        this._drinksUpdated.forEach(drinkUpdated => {
+            drinkInput = this._drinkInputs.filter(input => {
+                return input.index === drinkUpdated.index;
+            });
+            console.log('---- getUpdatedDrinks, drinkInput: ', drinkInput);
+            drinkUpdated.quantityAvailable -= drinkInput[0].drinkAmount.value;
+        });
+        return this._drinksUpdated;
     }
 }

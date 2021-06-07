@@ -55,12 +55,21 @@ namespace DrinksMachine.Controllers
             set { HttpContext.Session.Set<List<Coin>>("coins", value); }
         }
 
+        [HttpGet]
         public IActionResult GetAll()
         {
             if (coins == null)
             {
                 coins = _coins;
             }
+            return Ok(coins);
+        }
+
+        [HttpPut]
+        public IActionResult Update([FromBody] List<Coin> coinsToUpdate)
+        {
+            coins = coinsToUpdate;
+            _logger.LogDebug("---- coins", coins);
             return Ok(coins);
         }
     }
