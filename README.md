@@ -4,6 +4,8 @@
 ## application
 Application is a Web Core MVC with endpoints and vanilla Javascript
 
+Solution is located in  [/DrinksMachine](https://github.com/Absulit/gs-drinks-machine/tree/main/DrinksMachine) directory
+
 ## data
 No DB, data is stored temporarly on a Session for 24h.
 If the app is restarted the data is restored.
